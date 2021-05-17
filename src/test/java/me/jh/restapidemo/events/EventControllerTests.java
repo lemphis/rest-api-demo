@@ -5,9 +5,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.hateoas.MediaTypes;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
@@ -16,11 +19,11 @@ import java.time.LocalDateTime;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ExtendWith(SpringExtension.class)
-@WebMvcTest
+@SpringBootTest
+@AutoConfigureMockMvc
 public class EventControllerTests {
 
     @Autowired
@@ -28,9 +31,6 @@ public class EventControllerTests {
 
     @Autowired
     ObjectMapper objectMapper;
-
-    @MockBean
-    EventRepository eventRepository;
 
     @Test
     public void createEvent() throws Exception {
@@ -45,9 +45,9 @@ public class EventControllerTests {
                 .maxPrice(200)
                 .limitOfEnrollment(100)
                 .location("FASTFIND")
+                .free(true)
+                .offline(false)
                 .build();
-        event.setId(10L);
-        Mockito.when(eventRepository.save(event)).thenReturn(event);
 
         mockMvc.perform(post("/api/events/")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -55,7 +55,9 @@ public class EventControllerTests {
                 .content(objectMapper.writeValueAsString(event)))
                 .andDo(print())
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("id").exists());
+                .andExpect(jsonPath("id").exists())
+                .andExpect(header().exists(HttpHeaders.LOCATION))
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_VALUE));
     }
 
 }
