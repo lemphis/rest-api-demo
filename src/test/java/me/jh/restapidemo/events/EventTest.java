@@ -15,17 +15,17 @@ public class EventTest {
         assertThat(event).isNotNull();
     }
 
-    @Test
-    public void javaBean() {
-        String name = "Event";
-        String description = "test";
-
-        Event event = new Event();
-        event.setName(name);
-        event.setDescription(description);
-
-        assertThat(event.getName()).isEqualTo(name);
-        assertThat(event.getDescription()).isEqualTo(description);
-    }
+//    @Test
+//    public void javaBean() {
+//        String name = "Event";
+//        String description = "test";
+//
+//        Event event = new Event();
+//        event.setName(name);
+//        event.setDescription(description);
+//
+//        assertThat(event.getName()).isEqualTo(name);
+//        assertThat(event.getDescription()).isEqualTo(description);
+//    }
 
 }

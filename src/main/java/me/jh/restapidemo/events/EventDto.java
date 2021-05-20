@@ -2,21 +2,14 @@ package me.jh.restapidemo.events;
 
 import lombok.*;
 
-import javax.persistence.*;
 import java.time.LocalDateTime;
-
 
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
-@EqualsAndHashCode(of = "id")
-@Entity
-public class Event {
-
-    @Id
-    @GeneratedValue
-    private Long id;
+@Setter
+public class EventDto {
 
     private String name; // 이름
 
@@ -37,13 +30,5 @@ public class Event {
     private int maxPrice; // 참가비
 
     private int limitOfEnrollment; // 최대 참가 인원
-
-    private boolean offline;
-
-    private boolean free;
-
-    @Enumerated(EnumType.STRING)
-    @Builder.Default
-    private EventStatus eventStatus = EventStatus.DRAFT;
 
 }
