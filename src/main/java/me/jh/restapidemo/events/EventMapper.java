@@ -1,6 +1,6 @@
 package me.jh.restapidemo.events;
 
-import me.jh.restapidemo.BaseMapper;
+import me.jh.restapidemo.config.BaseMapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
 

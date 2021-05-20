@@ -1,4 +1,4 @@
-package me.jh.restapidemo;
+package me.jh.restapidemo.config;
 
 public interface BaseMapper<E, D> {
 
