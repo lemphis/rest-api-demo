@@ -30,7 +30,7 @@ public class EventControllerTests {
 
     @Test
     public void createEvent() throws Exception {
-        EventDto event = EventDto.builder()
+        EventDto eventDto = EventDto.builder()
                 .name("event")
                 .description("Test event")
                 .beginEnrollmentDateTime(LocalDateTime.of(2021, 5, 12, 23, 12))
@@ -46,7 +46,7 @@ public class EventControllerTests {
         mockMvc.perform(post("/api/events/")
                     .contentType(MediaType.APPLICATION_JSON)
                     .accept(MediaTypes.HAL_JSON)
-                    .content(objectMapper.writeValueAsString(event)))
+                    .content(objectMapper.writeValueAsString(eventDto)))
                 .andDo(print())
                 .andExpect(status().isCreated());
     }
@@ -84,6 +84,27 @@ public class EventControllerTests {
         mockMvc.perform(post("/api/events")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(eventDto)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void createEvent_Bad_Request_Wrong_Input() throws Exception {
+        EventDto eventDto = EventDto.builder()
+                .name("event")
+                .description("Test event")
+                .beginEnrollmentDateTime(LocalDateTime.of(2021, 5, 12, 23, 12))
+                .closeEnrollmentDateTime(LocalDateTime.of(2021, 5, 11, 23, 12))
+                .beginEventDateTime(LocalDateTime.of(2021, 5, 10, 23, 12))
+                .endEventDateTime(LocalDateTime.of(2021, 5, 9, 23, 12))
+                .basePrice(10000)
+                .maxPrice(2000)
+                .limitOfEnrollment(100)
+                .location("FASTFIND")
+                .build();
+
+        mockMvc.perform(post("/api/events")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(eventDto)))
                 .andExpect(status().isBadRequest());
     }
 
