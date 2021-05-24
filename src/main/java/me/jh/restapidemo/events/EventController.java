@@ -35,6 +35,7 @@ public class EventController {
         }
 
         Event event = eventMapper.toEntity(eventDto);
+        event.update();
         Event newEvent = eventRepository.save(event);
         URI createdUri = linkTo(EventController.class).slash(newEvent.getId()).toUri();
         return ResponseEntity.created(createdUri).body(newEvent);
