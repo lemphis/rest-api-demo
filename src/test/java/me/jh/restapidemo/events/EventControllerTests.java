@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Description;
 import org.springframework.context.annotation.Import;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.HttpHeaders;
@@ -202,15 +201,15 @@ public class EventControllerTests {
     }
 
     @Test
-    @Description("30개의 이벤트를 10개씩 두 번째 페이지 조회하기")
+    @DisplayName("30개의 이벤트를 10개씩 두 번째 페이지 조회하기")
     public void queryEvents() throws Exception {
         IntStream.range(0, 30).forEach(this::generateEvent);
 
         mockMvc.perform(get("/api/events")
-                    .param("page", "1")
-                    .param("size", "10")
-                    .param("sort", "name,DESC")
-                )
+                .param("page", "1")
+                .param("size", "10")
+                .param("sort", "name,DESC")
+        )
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("page").exists())
@@ -220,13 +219,35 @@ public class EventControllerTests {
                 .andDo(document("query-events"));
     }
 
-    private void generateEvent(int index) {
+    @Test
+    @DisplayName("기존의 이벤트를 하나 조회하기")
+    public void getEvent() throws Exception {
+        Event event = this.generateEvent(100);
+
+        this.mockMvc.perform(get("/api/events/{id}", event.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("name").exists())
+                .andExpect(jsonPath("_links.self").exists())
+                .andExpect(jsonPath("_links.profile").exists())
+                .andDo(document("get-an-event"));
+    }
+
+    @Test
+    @DisplayName("없는 이벤트 조회했을 때 404 응답 받기")
+    public void getEvent404() throws Exception {
+        Event event = this.generateEvent(100);
+
+        this.mockMvc.perform(get("/api/events/7777"))
+                .andExpect(status().isNotFound());
+    }
+
+    private Event generateEvent(int index) {
         Event event = Event.builder()
                 .name("event " + index)
                 .description("test event")
                 .build();
 
-        this.eventRepository.save(event);
+        return this.eventRepository.save(event);
     }
 
 }
