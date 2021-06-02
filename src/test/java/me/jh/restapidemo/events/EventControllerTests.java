@@ -32,6 +32,7 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.requestF
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -50,6 +51,9 @@ public class EventControllerTests {
 
     @Autowired
     ObjectMapper objectMapper;
+
+    @Autowired
+    EventMapper eventMapper;
 
     @Autowired
     EventRepository eventRepository;
@@ -241,10 +245,85 @@ public class EventControllerTests {
                 .andExpect(status().isNotFound());
     }
 
+    @Test
+    @DisplayName("이벤트를 정상적으로 수정하기")
+    public void updateEvent() throws Exception {
+        Event event = this.generateEvent(100);
+
+        EventDto eventDto = eventMapper.toDto(event);
+        String eventName = "Updated Event";
+        eventDto.setName(eventName);
+
+        eventRepository.save(event);
+
+        this.mockMvc.perform(put("/api/events/{id}", event.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(eventDto)))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("name").value(eventName))
+                .andExpect(jsonPath("_links.self").exists())
+                .andDo(document("update-event"));
+    }
+
+    @Test
+    @DisplayName("입력값이 비어 있는 경우에 이벤트 수정 실패")
+    public void patchEvent400_Empty() throws Exception {
+        Event event = this.generateEvent(100);
+
+        EventDto eventDto = new EventDto();
+
+        this.mockMvc.perform(put("/api/events/{id}", event.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(eventDto)))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("입력값이 잘못된 경우에 이벤트 수정 실패")
+    public void patchEvent400_Wrong() throws Exception {
+        Event event = this.generateEvent(100);
+
+        EventDto eventDto = eventMapper.toDto(event);
+        eventDto.setBasePrice(20000);
+        eventDto.setMaxPrice(10000);
+
+        this.mockMvc.perform(put("/api/events/{id}", event.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(eventDto)))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 이벤트 수정 실패")
+    public void patchEvent404() throws Exception {
+        Event event = this.generateEvent(100);
+        EventDto eventDto = eventMapper.toDto(event);
+
+        this.mockMvc.perform(put("/api/events/7777")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(eventDto)))
+                .andDo(print())
+                .andExpect(status().isNotFound());
+    }
+
     private Event generateEvent(int index) {
         Event event = Event.builder()
-                .name("event " + index)
-                .description("test event")
+                .name("event")
+                .description("Test event")
+                .beginEnrollmentDateTime(LocalDateTime.of(2021, 5, 12, 23, 12))
+                .closeEnrollmentDateTime(LocalDateTime.of(2021, 5, 13, 23, 12))
+                .beginEventDateTime(LocalDateTime.of(2021, 5, 14, 23, 12))
+                .endEventDateTime(LocalDateTime.of(2021, 5, 15, 23, 12))
+                .basePrice(100)
+                .maxPrice(200)
+                .limitOfEnrollment(100)
+                .location("FASTFIND")
+                .free(false)
+                .offline(true)
+                .eventStatus(EventStatus.DRAFT)
                 .build();
 
         return this.eventRepository.save(event);

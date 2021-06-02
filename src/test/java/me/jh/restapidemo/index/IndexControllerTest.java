@@ -29,7 +29,7 @@ public class IndexControllerTest {
 
     @Test
     public void index() throws Exception {
-        this.mockMvc.perform(get("/api/"))
+        this.mockMvc.perform(get("/"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("_links.events").exists());
     }
