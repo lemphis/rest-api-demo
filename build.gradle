@@ -37,7 +37,8 @@ dependencies {
             'org.springframework.boot:spring-boot-starter-web',
             'org.mapstruct:mapstruct:1.4.2.Final',
             'org.springframework.boot:spring-boot-starter-validation:2.4.5',
-            'mysql:mysql-connector-java:8.0.20'
+            'mysql:mysql-connector-java:8.0.20',
+            'org.springframework.security.oauth.boot:spring-security-oauth2-autoconfigure:2.5.0'
     )
     compileOnly(
             'org.projectlombok:lombok'
