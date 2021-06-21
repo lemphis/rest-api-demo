@@ -4,6 +4,7 @@ import me.jh.restapidemo.accounts.Account;
 import me.jh.restapidemo.accounts.AccountRepository;
 import me.jh.restapidemo.accounts.AccountRole;
 import me.jh.restapidemo.accounts.AccountService;
+import me.jh.restapidemo.config.AppProperties;
 import me.jh.restapidemo.config.BaseControllerTest;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
@@ -40,6 +41,9 @@ public class EventControllerTests extends BaseControllerTest {
 
     @Autowired
     AccountRepository accountRepository;
+
+    @Autowired
+    AppProperties appProperties;
 
     @BeforeEach
     public void setUp() {
@@ -134,22 +138,17 @@ public class EventControllerTests extends BaseControllerTest {
     }
 
     private String getAccessToken() throws Exception {
-        String username = "aaa@bbb";
-        String password = "jh";
         Account account = Account.builder()
-                .email(username)
-                .password(password)
+                .email(appProperties.getUserUsername())
+                .password(appProperties.getUserPassword())
                 .roles(Set.of(AccountRole.ADMIN, AccountRole.USER))
                 .build();
         this.accountService.saveAccount(account);
 
-        String clientId = "myApp";
-        String clientSecret = "pass";
-
         ResultActions perform = this.mockMvc.perform(post("/oauth/token")
-                .with(httpBasic(clientId, clientSecret))
-                .param("username", username)
-                .param("password", password)
+                .with(httpBasic(appProperties.getClientId(), appProperties.getClientSecret()))
+                .param("username", appProperties.getUserUsername())
+                .param("password", appProperties.getUserPassword())
                 .param("grant_type", "password"))
                 .andDo(print())
                 .andExpect(status().isOk())
